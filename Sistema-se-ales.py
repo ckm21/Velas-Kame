@@ -1,4 +1,6 @@
 import streamlit as st
 
-st.title("🚀 Prueba de Velas Kame")
-st.write("La app está funcionando correctamente.")
+st.set_page_config(page_title="Prueba mínima", layout="centered")
+
+st.title("✅ App de prueba cargada con éxito")
+st.write("Si ves este mensaje, tu Streamlit está funcionando.")
