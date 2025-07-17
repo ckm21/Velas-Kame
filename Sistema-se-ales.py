@@ -1,46 +1,19 @@
+
 import streamlit as st
-import json
-from funciones import (
-    obtener_datos_accion,
-    analizar_velas_japonesas,
-    mostrar_grafico_candlestick,
-    calcular_porcentaje_ganancia
-)
+from funciones import *
 
-# Cargar configuración
-with open("config.json", "r") as f:
-    config = json.load(f)
+st.set_page_config(page_title="Velas Kame", layout="wide")
 
-usuario = config.get("usuario", "ejemplo")
-modo = config.get("modo", "demo")
+menu = st.sidebar.selectbox("Menú", ["Inicio", "Mi portafolio", "Radar de Oportunidades", "Resumen"])
 
-st.title("📈 Sistema de Señales por Velas Japonesas")
-st.markdown("Bienvenido a la aplicación de análisis de acciones basada en velas japonesas.")
-st.markdown(f"**Usuario:** {usuario} | **Modo:** {modo}")
+if menu == "Inicio":
+    mostrar_inicio()
 
-# Semillero
-st.subheader("🌱 Semillero de Inversiones")
-st.info("Acciones con pequeñas inversiones activas a largo plazo.")
+elif menu == "Mi portafolio":
+    mostrar_portafolio()
 
-# Objetivos del usuario
-st.subheader("🎯 Objetivos del Usuario")
-meta = st.slider("Define tu meta de ganancia (%)", 1, 20, config.get("objetivo_semanal", 5))
-if meta < 5:
-    st.success("Buen objetivo.")
-elif meta < 10:
-    st.warning("Objetivo moderado.")
-else:
-    st.error("🚨 ¿Te crees el lobo de Wall Street?")
-st.markdown(f"**Tu objetivo semanal:** {meta}%")
+elif menu == "Radar de Oportunidades":
+    mostrar_radar()
 
-# Portafolio
-st.subheader("📊 Mi Portafolio")
-st.info("Aquí podrás ver tus acciones favoritas, ganancias y estado general.")
-
-acciones = config.get("acciones_favoritas", [])
-for accion in acciones:
-    datos = obtener_datos_accion(accion)
-    senal = analizar_velas_japonesas(datos)
-    ganancia = calcular_porcentaje_ganancia(accion)
-    st.write(f"📌 {accion} | Señal: {senal} | Ganancia: {ganancia}%")
-    mostrar_grafico_candlestick(datos, accion)
+elif menu == "Resumen":
+    mostrar_resumen()
