@@ -1,5 +1,1 @@
-streamlit
-pandas
-numpy
-yfinance
-matplotlib
+streamlit==1.35.0
