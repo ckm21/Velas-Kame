@@ -1,36 +1,41 @@
-
-import streamlit as st
 import yfinance as yf
-import pandas as pd
-import datetime
+import plotly.graph_objects as go
 
-acciones_favoritas = st.session_state.get("favoritas", [])
-inversiones = st.session_state.get("inversiones", [])
+def obtener_datos(ticker, intervalo="1d"):
+    try:
+        periodo = "7d" if intervalo in ["15m", "1h", "4h"] else "3mo"
+        df = yf.download(ticker, period=periodo, interval=intervalo, progress=False)
+        return df
+    except Exception as e:
+        print("Error al obtener datos:", e)
+        return None
 
-def mostrar_inicio():
-    st.title("Bienvenido a Velas Kame")
-    st.markdown("Sistema de señales basado en velas japonesas y análisis técnico adaptado para centennials y millennials.")
+def generar_grafico(df, ticker):
+    fig = go.Figure(data=[go.Candlestick(
+        x=df.index,
+        open=df["Open"],
+        high=df["High"],
+        low=df["Low"],
+        close=df["Close"],
+        name="Velas"
+    )])
+    fig.update_layout(title=f"Gráfico de {ticker}", xaxis_title="Fecha", yaxis_title="Precio")
+    return fig
 
-def mostrar_portafolio():
-    st.header("Mi portafolio")
-    favoritas = st.session_state.get("favoritas", [])
-    if favoritas:
-        st.subheader("Acciones favoritas")
-        st.write(", ".join(favoritas))
-    else:
-        st.info("Aún no has seleccionado acciones favoritas.")
+def detectar_senales(df):
+    senales = {"compra": False, "venta": False, "doji": False}
+    if df is None or len(df) < 2:
+        return senales
 
-def mostrar_radar():
-    st.header("Radar de Oportunidades")
-    ticker = st.text_input("Ingresa un ticker (ej. AAPL)")
-    if ticker:
-        df = yf.download(ticker, period="7d", interval="1h")
-        if not df.empty:
-            st.line_chart(df["Close"])
-            st.success("Análisis técnico cargado.")
-        else:
-            st.warning("No se pudo obtener la información.")
+    vela = df.iloc[-1]
+    cuerpo = abs(vela["Close"] - vela["Open"])
+    mecha = vela["High"] - vela["Low"]
 
-def mostrar_resumen():
-    st.header("Resumen general")
-    st.markdown("Aquí podrás ver un resumen de tus objetivos, ganancias y desempeño.")
+    if cuerpo < 0.1 * mecha:
+        senales["doji"] = True
+    elif vela["Close"] > vela["Open"]:
+        senales["compra"] = True
+    elif vela["Close"] < vela["Open"]:
+        senales["venta"] = True
+
+    return senales
